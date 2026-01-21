@@ -249,3 +249,24 @@ func isTrustedProxy(ip string, trustedProxies []*net.IPNet) bool {
 func isValidIP(ip string) bool {
 	return net.ParseIP(ip) != nil
 }
+
+func ParseProxyAddresses(proxies []string) ([]*net.IPNet, error) {
+	ipNets := make([]*net.IPNet, 0)
+	for _, proxy := range proxies {
+		if !strings.Contains(proxy, "/") {
+			if strings.Contains(proxy, ":") {
+				proxy = proxy + "/128"
+			} else {
+				proxy = proxy + "/32"
+			}
+		}
+
+		_, ipNet, err := net.ParseCIDR(proxy)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy address %s: %v", proxy, err)
+		}
+		ipNets = append(ipNets, ipNet)
+	}
+
+	return ipNets, nil
+}

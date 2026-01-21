@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -55,7 +54,10 @@ var serveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		trustedProxies := make([]*net.IPNet, 0)
+		trustedProxies, err := gatekeeper.ParseProxyAddresses(c.TrustedProxies)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		rateLimiter := server.NewRateLimiter(10, 20, server.WithTrustedProxies(trustedProxies), server.WithRealIp(gatekeeper.ExtractRealIP))
 
