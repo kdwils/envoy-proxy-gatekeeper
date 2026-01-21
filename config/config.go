@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	LogLevel       string     `yaml:"logLevel" json:"logLevel"`
-	Server         Server     `yaml:"server" json:"server"`
-	TrustedProxies []string   `yaml:"trustedProxies" json:"trustedProxies"`
-	Gatekeeper     Gatekeeper `yaml:"gatekeeper" json:"gatekeeper"`
+	LogLevel       string   `yaml:"logLevel" json:"logLevel"`
+	Server         Server   `yaml:"server" json:"server"`
+	TrustedProxies []string `yaml:"trustedProxies" json:"trustedProxies"`
+	Captcha        Captcha  `yaml:"captcha" json:"captcha"`
 }
 
 type Server struct {
@@ -21,16 +21,13 @@ type Server struct {
 	Scheme   string `yaml:"scheme" json:"scheme"`
 }
 
-type Gatekeeper struct {
-	Captcha Captcha `yaml:"captcha" json:"captcha"`
-}
-
 type Captcha struct {
 	Provider          string        `yaml:"provider" json:"provider"`
 	SiteKey           string        `yaml:"siteKey" json:"siteKey"`
 	SecretKey         string        `yaml:"secretKey" json:"secretKey"`
 	SigningKey        string        `yaml:"signingKey" json:"signingKey"`
 	CookieDomain      string        `yaml:"cookieDomain" json:"cookieDomain"`
+	CookieName        string        `yaml:"cookieName" json:"cookieName"`
 	Timeout           time.Duration `yaml:"timeout" json:"timeout"`
 	ChallengeDuration time.Duration `yaml:"challengeDuration" json:"challengeDuration"`
 	SessionDuration   time.Duration `yaml:"sessionDuration" json:"sessionDuration"`

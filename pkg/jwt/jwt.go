@@ -29,6 +29,8 @@ type Service struct {
 	sessionTTL     time.Duration
 	challengeTTL   time.Duration
 	challengeCache *cache.Cache[string, ChallengeClaims]
+	cookieDomain   string
+	cookieName     string
 }
 
 type ChallengeClaims struct {
@@ -66,7 +68,10 @@ type Provider interface {
 	Verify(ctx context.Context, response, remoteIP string) (bool, error)
 }
 
-func NewService(provider Provider, signingKey, siteKey string, timeout time.Duration, challengeTtl, sessionTtl time.Duration) Service {
+func NewService(provider Provider, signingKey, siteKey, cookieDomain, cookieName string, timeout time.Duration, challengeTtl, sessionTtl time.Duration) Service {
+	if cookieName == "" {
+		cookieName = "__Host-session"
+	}
 	cache := cache.New[string, ChallengeClaims]()
 	return Service{
 		signingKey:     []byte(signingKey),
@@ -202,14 +207,20 @@ func (s *Service) VerifySessionToken(tokenString string) (*SessionClaims, error)
 }
 
 func (s *Service) WriteSessionCookie(w http.ResponseWriter, token string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "__Host-session",
+	cookie := &http.Cookie{
+		Name:     s.cookieName,
 		Value:    token,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
-	})
+	}
+
+	if s.cookieDomain != "" {
+		cookie.Domain = s.cookieDomain
+	}
+
+	http.SetCookie(w, cookie)
 }
 
 func (s *Service) ipHashKey(ip string) string {
@@ -220,4 +231,8 @@ func (s *Service) ipHashKey(ip string) string {
 
 func (s *Service) Provider() (name string, siteKey string) {
 	return s.provider.Name(), s.siteKey
+}
+
+func (s *Service) CookieKey() string {
+	return s.cookieName
 }

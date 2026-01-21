@@ -30,20 +30,22 @@ var serveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		log.Println(c)
+
 		level := logger.LevelFromString(c.LogLevel)
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})
 		slogger := slog.New(handler)
 
 		httpClient := http.Client{
-			Timeout: c.Gatekeeper.Captcha.Timeout,
+			Timeout: c.Captcha.Timeout,
 		}
 
 		var provider jwt.Provider
-		switch strings.ToLower(c.Gatekeeper.Captcha.Provider) {
+		switch strings.ToLower(c.Captcha.Provider) {
 		case "turnstile":
-			provider, err = captcha.NewTurnstileProvider(c.Gatekeeper.Captcha.SecretKey, &httpClient)
+			provider, err = captcha.NewTurnstileProvider(c.Captcha.SecretKey, &httpClient)
 		case "recaptcha":
-			provider, err = captcha.NewRecaptchaProvider(c.Gatekeeper.Captcha.SecretKey, &httpClient)
+			provider, err = captcha.NewRecaptchaProvider(c.Captcha.SecretKey, &httpClient)
 		}
 		if err != nil {
 			log.Fatal(err)
@@ -61,7 +63,7 @@ var serveCmd = &cobra.Command{
 
 		rateLimiter := server.NewRateLimiter(10, 20, server.WithTrustedProxies(trustedProxies), server.WithRealIp(gatekeeper.ExtractRealIP))
 
-		tokenService := jwt.NewService(provider, c.Gatekeeper.Captcha.SigningKey, c.Gatekeeper.Captcha.SiteKey, c.Gatekeeper.Captcha.Timeout, c.Gatekeeper.Captcha.ChallengeDuration, c.Gatekeeper.Captcha.SessionDuration)
+		tokenService := jwt.NewService(provider, c.Captcha.SigningKey, c.Captcha.SiteKey, c.Captcha.CookieDomain, c.Captcha.CookieName, c.Captcha.Timeout, c.Captcha.ChallengeDuration, c.Captcha.SessionDuration)
 
 		gatekeeper := gatekeeper.New(&tokenService, trustedProxies)
 
