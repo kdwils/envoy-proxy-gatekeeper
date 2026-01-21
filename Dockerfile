@@ -1,0 +1,21 @@
+FROM golang:1.25 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o envoy-proxy-gatekeeper
+
+FROM gcr.io/distroless/static-debian12
+
+WORKDIR /app
+
+COPY --chown=1000:1000 --from=builder /app/envoy-proxy-gatekeeper /app/
+
+USER 1000
+
+ENTRYPOINT ["/app/envoy-proxy-gatekeeper"]
+CMD ["serve"]
