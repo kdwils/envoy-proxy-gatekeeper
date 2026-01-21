@@ -50,11 +50,11 @@ func initConfig() {
 	viper.SetDefault("server.grpcPort", 8080)
 	viper.SetDefault("server.httpPort", 8081)
 
-	viper.SetDefault("captcha.provider", "")
-	viper.SetDefault("captcha.siteKey", "")
-	viper.SetDefault("captcha.signingKey", "")
-	viper.SetDefault("captcha.cookieDomain", "")
-	viper.SetDefault("captcha.timeout", time.Second*10)
-	viper.SetDefault("captcha.challengeDuration", time.Minute*10)
-	viper.SetDefault("captcha.sessionDuration", time.Hour*3)
+	viper.SetDefault("gatekeeper.captcha.provider", "")
+	viper.SetDefault("gatekeeper.captcha.siteKey", "")
+	viper.SetDefault("gatekeeper.captcha.signingKey", "")
+	viper.SetDefault("gatekeeper.captcha.cookieDomain", "")
+	viper.SetDefault("gatekeeper.captcha.timeout", time.Second*10)
+	viper.SetDefault("gatekeeper.captcha.challengeDuration", time.Minute*10)
+	viper.SetDefault("gatekeeper.captcha.sessionDuration", time.Hour*3)
 }
