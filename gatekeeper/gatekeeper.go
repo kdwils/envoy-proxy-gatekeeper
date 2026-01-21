@@ -24,6 +24,7 @@ type TokenService interface {
 	VerifySessionToken(tokenString string) (*jwt.SessionClaims, error)
 	WriteSessionCookie(w http.ResponseWriter, token string)
 	Provider() (name string, siteKey string)
+	CookieKey() string
 }
 
 type Gatekeeper struct {
@@ -142,7 +143,7 @@ func (g Gatekeeper) VerifySession(ctx context.Context, request *auth.CheckReques
 		return nil, fmt.Errorf("auth check request is nil")
 	}
 
-	cookie := parseSessionCookie(request)
+	cookie := parseSessionCookie(request, g.tokenService.CookieKey())
 	if cookie == "" {
 		log.Debug("no session cookie present")
 		return nil, errors.New("no jwt cookie found")
@@ -164,7 +165,7 @@ func (g Gatekeeper) VerifySession(ctx context.Context, request *auth.CheckReques
 	return session, nil
 }
 
-func parseSessionCookie(r *auth.CheckRequest) string {
+func parseSessionCookie(r *auth.CheckRequest, cookieKey string) string {
 	atts := r.Attributes
 	if atts == nil {
 		return ""
@@ -197,9 +198,9 @@ func parseSessionCookie(r *auth.CheckRequest) string {
 			continue
 		}
 
-		key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-		if key == "__Host-session" {
-			return value
+		k, v := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+		if k == cookieKey {
+			return v
 		}
 	}
 
