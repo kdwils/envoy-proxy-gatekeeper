@@ -1,0 +1,21 @@
+name: releaser
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: goreleaser
+  cancel-in-progress: true
+
+jobs:
+  tag:
+    uses: kdwils/homelab-workflow/.github/workflows/update-image-tag.yml@main
+    secrets: inherit
+    with:
+      image: ${{ github.repository_owner }}/envoy-proxy-gatekeeper
+      registry: ghcr.io
